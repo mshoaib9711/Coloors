@@ -3,6 +3,11 @@ const colorDivs = document.querySelectorAll(".color");
 const generateBtn = document.querySelector(".generate");
 const sliders = document.querySelectorAll("input[type='range']");
 const currentHexes = document.querySelectorAll(".color h2");
+const popUp = document.querySelector(".copy-container");
+const adjustBtns = document.querySelectorAll(".adjust");
+const lockBtn = document.querySelectorAll(".lock");
+const closeAdjustments = document.querySelectorAll(".close-adjustment");
+const sliderContainers = document.querySelectorAll(".sliders");
 let initialColors;
 
 //Functions
@@ -17,6 +22,12 @@ function randomColors() {
   colorDivs.forEach((div) => {
     const hexText = div.children[0];
     const randomColor = generateHex();
+    if (div.classList.contains("locked")) {
+      initialColors.push(hexText.innerText);
+      return;
+    } else {
+      initialColors.push(chroma(randomColor).hex());
+    }
     initialColors.push(chroma(randomColor).hex());
 
     //Add color to bg
@@ -34,6 +45,11 @@ function randomColors() {
   });
   // Resetting the inputs to represent the color generated
   resetInputs();
+  //Check for btn Constrast
+  adjustBtns.forEach((button, index) => {
+    checkTextContrast(initialColors[index], button);
+    checkTextContrast(initialColors[index], lockBtn[index]);
+  });
 }
 function resetInputs() {
   const sliders = document.querySelectorAll(".sliders input");
@@ -112,6 +128,30 @@ function updateTextUI(index) {
     checkTextContrast(color, icon);
   }
 }
+function copyToClipboard(hex) {
+  const el = document.createElement("textarea");
+  el.value = hex.innerText;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
+  //animation
+  const popUpBox = popUp.children[0];
+  popUp.classList.add("active");
+  popUpBox.classList.add("active");
+}
+function openAdjustmentPanel(index) {
+  sliderContainers[index].classList.toggle("active");
+}
+function closeAdjustmentPanel(index) {
+  sliderContainers[index].classList.remove("active");
+}
+function lockColor(index) {
+  colorDivs[index].classList.toggle("locked");
+  lockBtn[index].children[0].classList.toggle("fa-lock-open");
+  lockBtn[index].children[0].classList.toggle("fa-lock");
+}
+
 //Event Listeners
 
 sliders.forEach((slider) => {
@@ -122,5 +162,30 @@ colorDivs.forEach((div, index) => {
     updateTextUI(index);
   });
 });
-
+currentHexes.forEach((hex) => {
+  hex.addEventListener("click", () => {
+    copyToClipboard(hex);
+  });
+});
+popUp.addEventListener("transitionend", () => {
+  const popUpBox = popUp.children[0];
+  popUp.classList.remove("active");
+  popUpBox.classList.remove("active");
+});
+adjustBtns.forEach((btn, index) => {
+  btn.addEventListener("click", () => {
+    openAdjustmentPanel(index);
+  });
+});
+closeAdjustments.forEach((btn, index) => {
+  btn.addEventListener("click", () => {
+    closeAdjustmentPanel(index);
+  });
+});
+generateBtn.addEventListener("click", randomColors);
+lockBtn.forEach((btn, index) => {
+  btn.addEventListener("click", () => {
+    lockColor(index);
+  });
+});
 randomColors();
