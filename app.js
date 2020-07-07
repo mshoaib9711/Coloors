@@ -9,7 +9,7 @@ const lockBtn = document.querySelectorAll(".lock");
 const closeAdjustments = document.querySelectorAll(".close-adjustment");
 const sliderContainers = document.querySelectorAll(".sliders");
 let initialColors;
-
+let savedPalettes = [];
 //Functions
 
 function generateHex() {
@@ -189,3 +189,53 @@ lockBtn.forEach((btn, index) => {
   });
 });
 randomColors();
+
+//Implementing local storage
+const saveBtn = document.querySelector(".save");
+const submitSave = document.querySelector(".submit-save");
+const closeSave = document.querySelector(".close-save");
+const saveContainer = document.querySelector(".save-container");
+const saveInput = document.querySelector(".save-container input");
+const libraryBtn = document.querySelector(".library");
+
+// Event listeners
+saveBtn.addEventListener("click", openPalette);
+closeSave.addEventListener("click", closePalette);
+submitSave.addEventListener("click", savePallete);
+
+function openPalette() {
+  const popUp = saveContainer.children[0];
+  saveContainer.classList.add("active");
+  popUp.classList.add("active");
+}
+function closePalette() {
+  const popUp = saveContainer.children[0];
+  saveContainer.classList.remove("active");
+  popUp.classList.remove("active");
+}
+function savePallete() {
+  const popUp = saveContainer.children[0];
+  saveContainer.classList.remove("active");
+  popUp.classList.remove("active");
+  const name = saveInput.value;
+  const colors = [];
+  currentHexes.forEach((hex) => {
+    colors.push(hex.innerText);
+  });
+  let paletteNr = savedPalettes.length;
+  const paletteObj = { name, colors, nr: paletteNr };
+  savedPalettes.push(paletteObj);
+  //save to local storage
+  savetoLocal(paletteObj);
+  saveInput.value = "";
+}
+function savetoLocal(paletteObj) {
+  let localPalettes;
+  if (localStorage.getItem("palettes") === null) {
+    localPalettes = [];
+  } else {
+    localPalettes = JSON.parse(localStorage.getItem("palettes"));
+  }
+  localPalettes.push(paletteObj);
+  localStorage.setItem("palettes", JSON.stringify(localPalettes));
+}
